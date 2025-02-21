@@ -1,23 +1,33 @@
 require 'open3'
 
 namespace :vox do
-  desc 'Promote a puppet-runtime or pxp-agent tag into this repo'
-  task :promote, [:component, :tag] do |_, args|
-    abort 'Component must be "puppet-runtime" or "pxp-agent"' unless !args[:component].nil? && ['puppet-runtime', 'pxp-agent'].include?(args[:component])
-    abort 'You must provide a tag for puppet-runtime that has been uploaded to s3.osuosl.org.' if args[:tag].nil? || args[:tag].empty?
+  desc 'Promote a component with a given ref into this repo. For puppet-runtime and pxp-agent, use the tag that has been built and uploaded to openvox-artifacts.'
+  task :promote, [:component, :ref] do |_, args|
+    component = args[:component]
+    ref = args[:ref]
+
+    abort 'You must specify a component.' if component.nil? || component.empty?
+    abort "Could not find configs/components/#{component}.json" unless File.exist?("configs/components/#{component}.json")
+    abort 'You must provide a ref.' if ref.nil? || ref.empty?
+
+    if ['puppet-runtime','pxp-agent'].include?(component)
+      munged = ref.gsub('-', '.')
+      data = <<~DATA
+        {"location":"https://s3.osuosl.org/openvox-artifacts/#{component}/#{ref}/","version":"#{munged}"}
+      DATA
+    else
+      data = <<~DATA
+        {"url":"https://github.com/openvoxproject/#{component}.git","ref":"#{ref}"}
+      DATA
+    end
 
     branch = run_command('git rev-parse --abbrev-ref HEAD')
 
-    munged = args[:tag].gsub('-', '.')
-    data = <<~DATA
-      {"location":"https://s3.osuosl.org/openvox-artifacts/#{args[:component]}/#{args[:tag]}/","version":"#{munged}"}
-    DATA
-
-    puts "Writing #{args[:component]}.json"
-    File.write("configs/components/#{args[:component]}.json", data)
-    run_command("git add configs/components/#{args[:component]}.json")
+    puts "Writing #{component}.json"
+    File.write("configs/components/#{component}.json", data)
+    run_command("git add configs/components/#{component}.json")
     puts 'Creating commit'
-    run_command("git commit -m 'Promote #{args[:component]} #{args[:tag]}'")
+    run_command("git commit -m 'Promote #{component} #{ref}'")
     puts 'Pushing to origin'
     run_command("git push origin #{branch}")
   end
