@@ -1,20 +1,24 @@
 require 'open3'
 
-RED = "\033[31m"
-GREEN = "\033[32m"
-RESET = "\033[0m"
+RED = "\033[31m".freeze
+GREEN = "\033[32m".freeze
+RESET = "\033[0m".freeze
 
+# Let's ignore rubocop here until such a time as we either muzzle it
+# or get these helpers more centralized and tested.
+# rubocop:disable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength
 def run_command(cmd, silent: true, print_command: false, report_status: false)
-  puts "#{GREEN}Running #{cmd}#{RESET}" if print_command
+  cmd_string = cmd.is_a?(String) ? cmd : cmd.join(' ')
+  puts "#{GREEN}Running #{cmd_string}#{RESET}" if print_command
   output = ''
-  Open3.popen2e(cmd) do |_stdin, stdout_stderr, thread|
+  Open3.popen2e(*Array(cmd)) do |_stdin, stdout_stderr, thread|
     stdout_stderr.each do |line|
       puts line unless silent
       output += line
     end
     exitcode = thread.value.exitstatus
     unless exitcode.zero?
-      err = "#{RED}Command failed! Command: #{cmd}, Exit code: #{exitcode}"
+      err = "#{RED}Command failed! Command: #{cmd_string}, Exit code: #{exitcode}"
       # Print details if we were running silent
       err += "\nOutput:\n#{output}" if silent
       err += RESET
@@ -24,6 +28,7 @@ def run_command(cmd, silent: true, print_command: false, report_status: false)
   end
   output.chomp
 end
+# rubocop:enable Metrics/AbcSize,Metrics/CyclomaticComplexity,Metrics/MethodLength
 
 Dir.glob(File.join('tasks/**/*.rake')).each { |file| load file }
 
