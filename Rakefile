@@ -53,7 +53,11 @@ task(:commits) do
   # ref, which is the common ancestor between the base branch and PR. Then do
   # git log for all of the commits in `HEAD` that are not in the base ref.
   github_base_ref = ENV.fetch('GITHUB_BASE_REF', 'main')
-  git_merge_base_cmd = ['git', 'merge-base', 'HEAD', github_base_ref]
+  # There's still something odd here. After action/checkout, 'main' by itself raises
+  # objections from git like: `fatal: Not a valid object name main`.
+  # but 'origin/main' works. However, if github_base_ref were a sha,
+  # origin/SHA would fail as a reference...
+  git_merge_base_cmd = ['git', 'merge-base', 'HEAD', "origin/#{github_base_ref}"]
   baseref = run_command(git_merge_base_cmd)
   commits = "#{baseref}..HEAD"
   git_log_cmd = ['git', 'log', '--no-merges', '--pretty=%s', commits]
