@@ -16,6 +16,14 @@ jobs:
   acceptance:
     name: Acceptance Tests
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os:
+          - ubuntu
+        os-version:
+          - '20.04'
+          - '22.04'
+          - '24.04'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -23,8 +31,8 @@ jobs:
       - id: vm-cluster
         uses: jpartlow/kvm_automation_tooling@main
         with:
-          os: ubuntu
-          os-version: 24.04
+          os: ${{ matrix.os }}
+          os-version: ${{ matrix.os-version }}
           os-arch: x86_64
           host-root-access: true
           ruby-version: ${{ env.RUBY_VERSION }}
