@@ -90,7 +90,9 @@ project 'openvox-agent' do |proj|
   proj.license "See components"
   proj.vendor "Vox Pupuli <openvox@voxpupuli.org>"
   proj.homepage "https://voxpupuli.org"
-  proj.target_repo "openvox7"
+
+  major = proj.get_version.split('.').first
+  proj.target_repo "openvox#{major}"
 
   if platform.is_solaris?
     proj.identifier "voxpupuli.org"
