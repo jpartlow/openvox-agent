@@ -1,10 +1,36 @@
 name: Acceptance Tests
 
 on:
-  push:
-    branches: [main]
-  pull_request:
-    branches: [main]
+  workflow_dispatch:
+    inputs:
+      pre-release-build:
+        description: |-
+          Whether to test unreleased version packages from the
+          artifacts server, or released packages from the given
+          collection.
+
+          If this is true, version must be a valid version, not
+          latest, and collection is ignored. The workflow will
+          download and install the matching openvox-agent package file
+          from the artifacts-url server.
+
+          If this is false, version and collection must match, and the
+          workflow will install the given openvox collection package
+          and then let the system package manager install the latest
+          or version package from the collection repository.
+        default: true
+        type: boolean
+      version:
+        description: 'Package version to test. (required if pre-release-build is true)'
+        type: string
+      collection:
+        description: 'OpenVox collection to use. (ignored if pre-release-build is true)'
+        default: 'openvox8'
+        type: string
+      artifacts-url:
+        description: 'URL to the artifacts server. (used if pre-release-build is true)'
+        default: 'https://s3.osuosl.org/openvox-artifacts'
+        type: string
 
 permissions:
   contents: read
@@ -21,6 +47,7 @@ jobs:
         os:
           - ubuntu
         os-version:
+          - '18.04'
           - '20.04'
           - '22.04'
           - '24.04'
@@ -36,6 +63,11 @@ jobs:
           os-arch: x86_64
           host-root-access: true
           ruby-version: ${{ env.RUBY_VERSION }}
+          install-openvox: true
+          openvox-version: ${{ github.event.inputs.version }}
+          openvox-collection: ${{ github.event.inputs.collection }}
+          openvox-released: ${{ github.event.inputs.released }}
+          openvox-artifacts-url: ${{ github.event.inputs.artifacts-url }}
           vms: |-
             [
               {
