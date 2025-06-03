@@ -1,5 +1,3 @@
-## Unreleased
-
 ## 7.36.1
 
 * Fix version in puppet component
