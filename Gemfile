@@ -17,5 +17,6 @@ gem 'rake'
 gem 'json'
 gem 'octokit'
 gem 'rubocop', "~> 1.22"
+gem 'github_changelog_generator'
 
 eval_gemfile("#{__FILE__}.local") if File.exist?("#{__FILE__}.local")

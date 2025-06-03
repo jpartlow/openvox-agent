@@ -1,3 +1,5 @@
+OPENVOX_AGENT_VERSION = "7.36.1"
+
 def run_command(cmd)
   output, status = Open3.capture2e(cmd)
   abort "Command failed! Command: #{cmd}, Output: #{output}" unless status.exitstatus.zero?
@@ -63,5 +65,29 @@ task(:commits) do
         end
       end
     end
+  end
+end
+
+begin
+  require "github_changelog_generator/task"
+
+  GitHubChangelogGenerator::RakeTask.new :changelog do |config|
+    config.header = <<~HEADER.chomp
+    # Changelog
+    All notable changes to this project will be documented in this file.
+    HEADER
+    config.user = "openvoxproject"
+    config.project = "openvox-agent"
+    config.exclude_labels = %w[dependencies duplicate question invalid wontfix wont-fix modulesync skip-changelog]
+    config.future_release = OPENVOX_AGENT_VERSION
+    # FIXME: The following should be enough to ignore versions in the main
+    # branch only, but this does not work.  For now we rely on a regexp to
+    # exclude tags that should not be matched.
+    config.release_branch = "7.x"
+    config.exclude_tags_regex = /\A8\./
+  end
+rescue LoadError
+  task :changelog do
+    abort("Run `bundle install --with packaging` to install the `github_changelog_generator` gem.")
   end
 end
