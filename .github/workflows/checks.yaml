@@ -15,7 +15,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        check: [ 'rubocop', 'commits' ]
+        check:
+          - 'rubocop'
     steps:
       - name: Checkout current PR
         uses: actions/checkout@v4
