@@ -19,9 +19,15 @@ test_name 'Validate openssl version and fips' do
   agents.each do |agent|
     openssl = openssl_command(agent)
 
+    puppet_version = on(agent, puppet('--version')).stdout.chomp
+    expected_openssl = case puppet_version
+                       when /^7\./ then 1
+                       else 3
+                       end
+
     step "check openssl version" do
       on(agent, "#{openssl} version -v") do |result|
-        assert_match(/^OpenSSL 3\./, result.stdout)
+        assert_match(/^OpenSSL #{expected_openssl}\./, result.stdout)
       end
     end
 

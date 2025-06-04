@@ -21,7 +21,10 @@ def setup_build_environment(agent)
   # We add `--enable-system-libraries` to use system libsqlite3
   gem_install_sqlite3 = "env GEM_HOME=/opt/puppetlabs/puppet/lib/ruby/vendor_gems " + gem_command(agent) + " install sqlite3 -- --enable-system-libraries"
   install_package_on_agent = package_installer(agent)
-  rubygems_version = agent['platform'] =~ /aix-7\.2/ ? '3.4.22' : ''
+
+  puppet_version = on(agent, puppet('--version')).stdout.chomp
+  rubygems_version = ((agent['platform'] =~ /aix-7\.2/) ||
+                      (puppet_version =~ /^7\./)) ? '3.4.22' : ''
   on(agent, "#{gem_command(agent)} update --system #{rubygems_version}")
 
   case agent['platform']
