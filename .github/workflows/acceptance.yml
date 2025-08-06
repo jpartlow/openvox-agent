@@ -71,37 +71,7 @@ jobs:
     with:
       ref: ${{ inputs.ref }}
       project-name: openvox-agent
-      os-add: |-
-        [
-          ["debian", "13", "amd64", "daily-latest"]
-        ]
-      install-openvox: true
       openvox-collection: ${{ inputs.collection }}
       openvox-agent-version: ${{ inputs.version }}
       openvox-agent-pre-release-build: ${{ inputs.pre-release-build }}
-      install-openvox-server: false
-      install-openvoxdb: false
       artifacts-url: ${{ inputs.artifacts-url }}
-      acceptance-working-dir: 'acceptance'
-      acceptance-pre-suite: |-
-        [
-          "pre-suite/configure_type_defaults.rb"
-        ]
-      acceptance-tests: |-
-        [
-          "tests"
-        ]
-      beaker-options: |-
-        {
-          "helper":       "lib/helper.rb"
-        }
-      vms: |-
-        [
-          {
-            "role": "agent",
-            "count": 1,
-            "cpus": 2,
-            "mem_mb": 4096,
-            "cpu_mode": "host-model"
-          }
-        ]
